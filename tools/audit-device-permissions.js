@@ -23,9 +23,19 @@ function auditDevices(data, at = Date.now()) {
       summary.malformed_entries++;
       continue;
     }
-    if (d.revoked_at) { summary.revoked++; continue; }
+    if (d.revoked_at) {
+      if (typeof d.revoked_at === 'string' && Number.isFinite(Date.parse(d.revoked_at))) {
+        summary.revoked++;
+        continue;
+      }
+      // Invalid revocation markers must not mask potentially active privileges.
+      summary.malformed_entries++;
+    }
     const expires = typeof d.expires_at === 'string' ? Date.parse(d.expires_at) : NaN;
-    const permissions = Array.isArray(d.permissions) ? d.permissions : [];
+    const validPermissions = Array.isArray(d.permissions) &&
+      d.permissions.every(p => typeof p === 'string' && p.trim().length > 0);
+    if (!validPermissions) summary.malformed_entries++;
+    const permissions = validPermissions ? d.permissions : [];
     const wildcard = permissions.includes('*');
     const pcAction = permissions.includes('pc:action');
     if (!Number.isFinite(expires)) {
@@ -39,7 +49,7 @@ function auditDevices(data, at = Date.now()) {
     if (pcAction) summary.active_pc_action++;
   }
   const riskCount = summary.active_pc_action + summary.active_wildcard +
-    summary.potentially_privileged_unknown_expiry + summary.malformed_entries;
+    summary.unknown_expiry + summary.malformed_entries;
   return { ...summary, needs_manual_review: riskCount > 0 };
 }
 
