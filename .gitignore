@@ -1,32 +1,63 @@
-# MARÈIA — non pubblicare dati o segreti
+# MARÈIA — safeguard against accidental public uploads
+# This is defense in depth, not a substitute for a secret/data review.
 .env
 .env.*
 !.env.example
+config.json
+config.local.json
+*.local.json
 *.pem
 *.key
 *.p12
 *.pfx
 *credentials*.json
 *secrets*.json
+license*.json
+*.license
+
+# Runtime state, private databases, backups, exports and logs
+data/
+backups/
+backup/
+state/
+sessions/
+logs/
+exports/
+private/
+secrets/
 *.sqlite
 *.sqlite3
+*.sqlite-*
 *.db
+*.db-*
 *.db-wal
 *.db-shm
 *.bak
 *.backup
-backups/
-backup/
-data/private/
-private/
-secrets/
+*.log
+
+# Large runtime binaries, local AI models, archives
+runtime/
+models/
+*.gguf
+*.onnx
+*.pt
+*.pth
+*.safetensors
+*.exe
+*.dll
+*.zip
+*.7z
+*.rar
+
+# Generated files and dependencies
 node_modules/
+vendor/node_modules/
 .venv/
 venv/
 __pycache__/
 .pytest_cache/
 dist/
 build/
-*.log
 .DS_Store
 Thumbs.db
